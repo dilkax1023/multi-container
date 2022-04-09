@@ -1,0 +1,23 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+    - docker build -t ghani0999/client -f ./client/Dockerfile.dev ./client
+
+scripts:
+    - docker run ghani0999/client npm run test
+
+after-success:
+    - docker build -t ghani0999/multi-client ./client
+    - docker build -t ghani0999/multi-nginx ./nginx
+    - docker build -t ghani0999/multi-server ./server
+    - docker build -t ghani0999/multi-worker ./worker
+    # Log in to Docker CLI
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+    # Take those iamges and push them to the Dockerhub
+    - docker push ghani0999/multi-client
+    - docker push ghani0999/multi-nginx
+    - docker push ghani0999/multi-server
+    - docker push ghani0999/multi-worker
